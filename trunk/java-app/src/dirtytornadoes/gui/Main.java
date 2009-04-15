@@ -1,4 +1,4 @@
-package GUI;
+package dirtytornadoes.gui;
 
 /*
  * To change this template, choose Tools | Templates

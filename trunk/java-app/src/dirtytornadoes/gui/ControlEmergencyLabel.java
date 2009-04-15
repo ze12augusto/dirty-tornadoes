@@ -1,4 +1,4 @@
-package GUI;
+package dirtytornadoes.gui;
 import java.awt.Color;
 
 import javax.swing.JLabel;
