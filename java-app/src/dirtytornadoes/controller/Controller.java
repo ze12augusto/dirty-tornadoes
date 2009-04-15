@@ -1,5 +1,6 @@
 package dirtytornadoes.controller;
 
+import dirtytornadoes.controller.io.SerialIO;
 import dirtytornadoes.controller.train.Train;
 
 public class Controller
