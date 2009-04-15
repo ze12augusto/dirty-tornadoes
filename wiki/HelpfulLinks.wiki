@@ -1,0 +1,6 @@
+#summary Helpful links for our project
+#labels Featured
+
+= Links =
+  * http://www.ibm.com/developerworks/java/jdk/linux/
+  * http://java.sun.com/products/javacomm/
