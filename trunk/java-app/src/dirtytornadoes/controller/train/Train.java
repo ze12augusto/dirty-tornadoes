@@ -3,8 +3,9 @@ package dirtytornadoes.controller.train;
 import java.util.HashMap;
 
 import dirtytornadoes.controller.IllegalTrainOperation;
+import dirtytornadoes.controller.train.events.TrainEvent;
 
-public class Train
+public class Train extends TrainObject
 {
 	private Engine engine;
 	
@@ -23,13 +24,31 @@ public class Train
 	
 	private void setupDoors()
 	{
-		doors.put("left", new Door());
-		doors.put("right", new Door());
+		String[] doorNames = { "left", "right" };
+		
+		for (String name : doorNames)
+			doors.put(name, new Door(name));
 	}
 	
 	public void checkConditions()
-	{
+	{		
+		// check for open AND unlocked doors
+		if (engine.isInMotion())
+		{
+			for(Door d : doors.values())
+			{
+				if (!d.isLocked())
+				{
+					engine.brakesOn();
+				}
+			}
+		}
 		
+		// check for emergency
+		if (isEmergency())
+		{
+			
+		}
 	}
 	
 	public void openDoors() throws IllegalTrainOperation
@@ -46,9 +65,29 @@ public class Train
 		
 	}
 	
-	public void startMoving()
+	public void startMoving() throws IllegalTrainOperation
 	{
+		if (engine.isInMotion())
+			return;
 		
+		for (Door d : doors.values())
+		{
+			if (!d.isLocked())
+			{
+				// try to lock doors
+				if (d.isOpen() && !d.isBlocked())
+				{
+					d.close();
+					d.lock();
+				}
+				else
+				{
+					throw new IllegalTrainOperation("Cannot move until all doors locked");
+				}
+			}
+		}
+		
+		engine.start();
 	}
 	
 	public boolean isEmergency()
@@ -56,7 +95,7 @@ public class Train
 		return emergency;
 	}
 	
-	public void activeEmergency()
+	public void activateEmergency()
 	{
 		emergency = true;
 	}
@@ -64,5 +103,12 @@ public class Train
 	public void resetEmergency()
 	{
 		emergency = false;
+	}
+
+	@Override
+	public void handleTrainEvent( TrainEvent ev )
+	{
+		// TODO Auto-generated method stub
+		
 	}
 }
