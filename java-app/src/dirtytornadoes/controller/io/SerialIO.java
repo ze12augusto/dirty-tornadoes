@@ -3,7 +3,7 @@ package dirtytornadoes.controller.io;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.Enumeration;
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.TooManyListenersException;
 
@@ -15,6 +15,8 @@ import javax.comm.SerialPort;
 import javax.comm.SerialPortEvent;
 import javax.comm.SerialPortEventListener;
 import javax.comm.UnsupportedCommOperationException;
+
+import dirtytornadoes.controller.train.events.TrainEventListener;
 
 
 public class SerialIO implements SerialPortEventListener, CommPortOwnershipListener
@@ -33,11 +35,20 @@ public class SerialIO implements SerialPortEventListener, CommPortOwnershipListe
 	private InputStream input;
 	private OutputStream output;
 	private LinkedList<String> data;
+	
+	// listeners
+	private ArrayList<TrainEventListener> listeners;
 
-	public SerialIO()
+	protected SerialIO()
 	{
 		connected = false;
 		data = new LinkedList<String>();
+	}
+	
+	public void addEventListener( TrainEventListener object )
+	{
+		if (!listeners.contains(object))
+			listeners.add(object);
 	}
 
 	public void connect( String portName ) throws SerialConnectionException
@@ -162,29 +173,33 @@ public class SerialIO implements SerialPortEventListener, CommPortOwnershipListe
 		serialPort.sendBreak(1000);
 	}
 
-	public boolean sendData( String data )
+	public void sendData( String data ) throws SerialConnectionException
 	{
 		if (!connected)
 		{
 			System.err.println("SerialIO :: Could not send data to an unopened port");
-			return false;
+			throw new SerialConnectionException("Can not send data to unopened port");
 		}
 
 		try
 		{
 			output.write(data.getBytes());
-			return true;
 		}
 		catch (IOException e)
 		{
 			System.err.println("SerialIO :: Could not send data");
-			return false;
+			throw new SerialConnectionException(e.getMessage());
 		}
 	}
 	
-	public String read()
+	public boolean hasMoreData()
 	{
-		if (data.size() > 0)
+		return !data.isEmpty();
+	}
+	
+	public String readData()
+	{
+		if (hasMoreData())
 			return data.pop();
 		else
 			return null;
@@ -255,5 +270,17 @@ public class SerialIO implements SerialPortEventListener, CommPortOwnershipListe
 		{
 			System.out.println("SerialIO :: Someone is requesting port ownership...");
 		}
+	}
+	
+	// SINGLETON CODE
+	
+	private static class SingletonHolder
+	{
+		private final static SerialIO INSTANCE = new SerialIO();
+	}
+	
+	public static SerialIO getInstance()
+	{
+		return SingletonHolder.INSTANCE;
 	}
 }

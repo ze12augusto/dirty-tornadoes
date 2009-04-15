@@ -1,6 +1,9 @@
 package dirtytornadoes.controller.train;
 
-public class Engine
+import dirtytornadoes.controller.IllegalTrainOperation;
+import dirtytornadoes.controller.train.events.TrainEvent;
+
+public class Engine extends TrainObject
 {
 	private boolean inMotion;
 	private boolean brakesOn;
@@ -15,10 +18,19 @@ public class Engine
 	{
 		return inMotion;
 	}
-
-	public void setInMotion( boolean inMotion )
+	
+	public void start() throws IllegalTrainOperation
 	{
-		this.inMotion = inMotion;
+		if (brakesOn)
+			throw new IllegalTrainOperation("Cannot move train with brakes on");
+		
+		inMotion = true;
+	}
+	
+	public void stop()
+	{
+		brakesOn = true;
+		inMotion = false;
 	}
 
 	public boolean brakesOn()
@@ -26,8 +38,10 @@ public class Engine
 		return brakesOn;
 	}
 
-	public void setBrakesOn( boolean brakesOn )
+	@Override
+	public void handleTrainEvent( TrainEvent ev )
 	{
-		this.brakesOn = brakesOn;
+		// TODO Auto-generated method stub
+		
 	}
 }
