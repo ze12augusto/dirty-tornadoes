@@ -1,4 +1,4 @@
-package dirtytornadoes.controller;
+package dirtytornadoes.controller.io;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -16,7 +16,6 @@ import javax.comm.SerialPortEvent;
 import javax.comm.SerialPortEventListener;
 import javax.comm.UnsupportedCommOperationException;
 
-import dirtytornadoes.controller.io.SerialConnectionException;
 
 public class SerialIO implements SerialPortEventListener, CommPortOwnershipListener
 {
