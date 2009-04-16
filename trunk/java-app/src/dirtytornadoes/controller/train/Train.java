@@ -36,7 +36,12 @@ public class Train extends TrainObject
 		{
 			for(Door d : doors)
 				if (!d.isLocked())
+				{
+					if (Controller.DEBUG)
+						System.err.println("Found "+d.getName()+" door unlocked, stopping engine");
+					
 					engine.stop();
+				}
 		}
 	}
 	
@@ -174,7 +179,7 @@ public class Train extends TrainObject
 		}
 		catch (IllegalTrainOperation e)
 		{
-			System.err.println(e.getMessage());
+			System.err.println("Exception: "+e.getMessage());
 			
 			if (e.hasParent())
 				System.err.println("Parent Exception: "+e.getParent().getMessage());

@@ -17,9 +17,12 @@ public class TrainEvent extends EventObject
 	
 	// door
 	public static final int DOOR_OPEN = 10;
-	public static final int DOOR_BLOCK = 11;
-	public static final int DOOR_CLOSE = 12;
+	public static final int DOOR_CLOSE = 11;
+	public static final int DOOR_UNLOCK = 12;
 	public static final int DOOR_LOCK = 13;
+	public static final int DOOR_UNBLOCK = 14;
+	public static final int DOOR_BLOCK = 15;
+	
 	
 	// engine
 	public static final int ENGINE_BRAKES_ON = 20;
