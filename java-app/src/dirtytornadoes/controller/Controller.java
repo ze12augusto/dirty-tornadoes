@@ -5,7 +5,6 @@ import java.util.StringTokenizer;
 
 import dirtytornadoes.controller.io.SerialDataEvent;
 import dirtytornadoes.controller.io.SerialDataEventListener;
-import dirtytornadoes.controller.io.SerialIO;
 import dirtytornadoes.controller.train.Door;
 import dirtytornadoes.controller.train.IllegalTrainOperation;
 import dirtytornadoes.controller.train.Train;
@@ -52,7 +51,7 @@ public class Controller extends Thread implements SerialDataEventListener
 		
 		int type = Integer.parseInt(st.nextToken());
 		
-		String data = "";
+		String data = null;
 		if (st.hasMoreTokens())
 			data = st.nextToken();
 		
