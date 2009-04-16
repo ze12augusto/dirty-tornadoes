@@ -34,6 +34,9 @@ public class Engine extends TrainObject
 	
 	public void stop()
 	{
+		if (!isInMotion())
+			return;
+		
 		brakesOn();
 		
 		try
