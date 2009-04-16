@@ -1,6 +1,6 @@
 package dirtytornadoes.controller.train;
 
-import dirtytornadoes.controller.io.SerialIO;
+import dirtytornadoes.controller.Controller;
 import dirtytornadoes.controller.train.events.TrainEvent;
 
 public class Engine extends TrainObject
@@ -19,23 +19,14 @@ public class Engine extends TrainObject
 		return inMotion;
 	}
 	
-	public void setInMotion()
-	{
-		inMotion = true;
-		brakesOn = false;
-	}
-	
-	public void setStopped()
-	{
-		inMotion = false;
-	}
-	
 	public void start() throws IllegalTrainOperation
 	{
 		if (brakesOn)
 			throw new IllegalTrainOperation("Cannot start train with brakes on");
 		
 		inMotion = true;
+		if (Controller.DEBUG)
+			System.out.println("Train engine started");
 	}
 	
 	public void stop()
@@ -49,7 +40,21 @@ public class Engine extends TrainObject
 		catch (InterruptedException e)
 		{}
 		
-		inMotion = false;
+		setStopped();
+	}
+	
+	public void brakesOn()
+	{
+		brakesOn = true;
+		if (Controller.DEBUG)
+			System.out.println("Train's brakes activated");
+	}
+	
+	public void brakesOff()
+	{
+		brakesOn = false;
+		if (Controller.DEBUG)
+			System.out.println("Train's brakes deactivated");
 	}
 
 	public boolean brakesAreOn()
@@ -57,14 +62,35 @@ public class Engine extends TrainObject
 		return brakesOn;
 	}
 	
-	public void brakesOn()
+	private void forceBrakesOn()
 	{
 		brakesOn = true;
+		inMotion = false;
+		if (Controller.DEBUG)
+			System.out.println("Train's brakes FORCED on");
 	}
 	
-	public void brakesOff()
+	private void forceBrakesOff()
 	{
 		brakesOn = false;
+		if (Controller.DEBUG)
+			System.out.println("Train's brakes FORCED off");
+	}
+	
+	private void setInMotion()
+	{
+		inMotion = true;
+		brakesOn = false;
+		if (Controller.DEBUG)
+			System.out.println("Train FORCED in motion");
+	}
+	
+	private void setStopped()
+	{
+		inMotion = false;
+		brakesOn = true;
+		if (Controller.DEBUG)
+			System.out.println("Train FORCED stopped");
 	}
 
 	@Override
@@ -73,11 +99,11 @@ public class Engine extends TrainObject
 		switch (ev.getType())
 		{
 			case TrainEvent.ENGINE_BRAKES_OFF:
-				brakesOff();
+				forceBrakesOff();
 			break;
 			
 			case TrainEvent.ENGINE_BRAKES_ON:
-				brakesOn();
+				forceBrakesOn();
 			break;
 			
 			case TrainEvent.ENGINE_IN_MOTION:
@@ -94,8 +120,7 @@ public class Engine extends TrainObject
 	@Override
 	public void updateController()
 	{
-		// TODO send engine information
-		SerialIO s = SerialIO.getInstance();
+		// TODO Send engine information
 		
 		// send motion
 		

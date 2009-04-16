@@ -1,9 +1,13 @@
 package dirtytornadoes.controller.train;
 
+import dirtytornadoes.controller.Controller;
 import dirtytornadoes.controller.train.events.TrainEvent;
 
 public class Door extends TrainObject
 {
+	public static final String LEFT = "Left";
+	public static final String RIGHT = "Right";
+	
 	private String name;
 	private boolean open;
 	private boolean locked;
@@ -32,20 +36,24 @@ public class Door extends TrainObject
 		return open;
 	}
 
-	public boolean open()
+	public void open() throws IllegalTrainOperation
 	{
-		if (!isLocked())
-			open = true;
+		if (isLocked())
+			throw new IllegalTrainOperation("Cannot open "+name+" door when locked");
 		
-		return open;
+		open = true;
+		if (Controller.DEBUG)
+			System.out.println(name+" door opened");
 	}
 	
-	public boolean close()
+	public void close() throws IllegalTrainOperation
 	{
-		if (!isBlocked())
-			open = false;
+		if (isBlocked())
+			throw new IllegalTrainOperation("Cannot close "+name+" door when blocked");
 		
-		return !open;
+		open = false;
+		if (Controller.DEBUG)
+			System.out.println(name+" door closed");
 	}
 
 	public boolean isLocked()
@@ -53,35 +61,58 @@ public class Door extends TrainObject
 		return locked;
 	}
 
-	public boolean lock()
+	public void lock() throws IllegalTrainOperation
 	{
-		if (!isOpen())
-			locked = true;
-		
-		return locked;
+		if (isOpen())
+			throw new IllegalTrainOperation("Cannot lock "+name+" door when open");
+			
+		locked = true;
+		if (Controller.DEBUG)
+			System.out.println(name+" door locked");
 	}
 	
 	public void unLock()
 	{
 		locked = false;
+		if (Controller.DEBUG)
+			System.out.println(name+" door unlocked");
 	}
 
 	public boolean isBlocked()
 	{
 		return blocked;
 	}
-
-	public boolean block()
+	
+	private void forceBlock()
 	{
-		if (isOpen())
-			blocked = true;
-		
-		return blocked;
+		forceOpen();
+		blocked = true;
+		if (Controller.DEBUG)
+			System.out.println(name+" door FORCED blocked");
 	}
 	
-	public void unBlock()
+	private void forceClose()
 	{
-		blocked = true;
+		open = false;
+		blocked = false;
+		if (Controller.DEBUG)
+			System.out.println(name+" door FORCED closed");
+	}
+	
+	private void forceOpen()
+	{
+		open = true;
+		locked = false;
+		if (Controller.DEBUG)
+			System.out.println(name+" door FORCED open");
+	}
+	
+	private void forceLock()
+	{
+		forceClose();
+		locked = true;
+		if (Controller.DEBUG)
+			System.out.println(name+" door FORCED locked");
 	}
 
 	@Override
@@ -93,18 +124,19 @@ public class Door extends TrainObject
 		switch (ev.getType())
 		{
 			case TrainEvent.DOOR_BLOCK:
-				block();
+				forceBlock();
 			break;
 			
 			case TrainEvent.DOOR_CLOSE:
-				close();
+				forceClose();
 			break;
 			
 			case TrainEvent.DOOR_OPEN:
-				open();
+				forceOpen();
 			break;
-
-			default:
+			
+			case TrainEvent.DOOR_LOCK:
+				forceLock();
 			break;
 		}
 	}
