@@ -7,44 +7,44 @@ public class TrainEvent extends EventObject
 	private static final long serialVersionUID = 1L;
 	
 	// actions
-	public static final int ACTION_OPEN_DOORS = 00;
-	public static final int ACTION_CLOSE_DOORS = 01;
-	public static final int ACTION_LOCK_DOORS = 02;
-	public static final int ACTION_START_MOVING = 04;
-	public static final int ACTION_STOP_MOVING = 05;
-	public static final int ACTION_EMERGENCY = 06;
-	public static final int ACTION_EMERGENCY_RESET = 07;
+	public static final char ACTION_OPEN_DOORS = 0x41;
+	public static final char ACTION_CLOSE_DOORS = 0x42;
+	public static final char ACTION_LOCK_DOORS = 0x43;
+	public static final char ACTION_START_MOVING = 0x44;
+	public static final char ACTION_STOP_MOVING = 0x45;
+	public static final char ACTION_EMERGENCY = 0x46;
+	public static final char ACTION_EMERGENCY_RESET = 0x47;
 	
 	// door
-	public static final int DOOR_OPEN = 10;
-	public static final int DOOR_CLOSE = 11;
-	public static final int DOOR_UNLOCK = 12;
-	public static final int DOOR_LOCK = 13;
-	public static final int DOOR_UNBLOCK = 14;
-	public static final int DOOR_BLOCK = 15;
+	public static final char DOOR_OPEN = 0x50;
+	public static final char DOOR_CLOSE = 0x51;
+	public static final char DOOR_UNLOCK = 0x52;
+	public static final char DOOR_LOCK = 0x53;
+	public static final char DOOR_UNBLOCK = 0x54;
+	public static final char DOOR_BLOCK = 0x55;
 	
 	// engine
-	public static final int ENGINE_BRAKES_ON = 20;
-	public static final int ENGINE_BRAKES_OFF = 21;
-	public static final int ENGINE_IN_MOTION = 22;
-	public static final int ENGINE_STOPPED = 23;	
+	public static final char ENGINE_BRAKES_ON = 0x60;
+	public static final char ENGINE_BRAKES_OFF = 0x61;
+	public static final char ENGINE_IN_MOTION = 0x62;
+	public static final char ENGINE_STOPPED = 0x63;	
 	
-	private int type;
-	private String data;
+	private char type;
+	private char data;
 
-	public TrainEvent( Object source, int type, String data )
+	public TrainEvent( Object source, char type, char data )
 	{
 		super(source);
 		this.type = type;
 		this.data = data;
 	}
 	
-	public int getType()
+	public char getType()
 	{
 		return type;
 	}
 	
-	public String getData()
+	public char getData()
 	{
 		return data;
 	}

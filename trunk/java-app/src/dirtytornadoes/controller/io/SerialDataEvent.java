@@ -6,15 +6,22 @@ public class SerialDataEvent extends EventObject
 {
 	private static final long serialVersionUID = 1L;
 	
-	private String data;
+	private char[] data;
 	
-	public SerialDataEvent( Object source, String data )
+	public SerialDataEvent( Object source, char data )
+	{
+		super(source);
+		char[] newData = { data };
+		this.data = newData;
+	}
+	
+	public SerialDataEvent( Object source, char[] data )
 	{
 		super(source);
 		this.data = data;
 	}
 	
-	public String getData()
+	public char[] getData()
 	{
 		return data;
 	}

@@ -3,6 +3,7 @@ package dirtytornadoes.controller;
 import java.util.ArrayList;
 import java.util.StringTokenizer;
 
+import dirtytornadoes.controller.io.SerialConnectionException;
 import dirtytornadoes.controller.io.SerialDataEvent;
 import dirtytornadoes.controller.io.SerialDataEventListener;
 import dirtytornadoes.controller.io.SerialIO;
@@ -14,7 +15,7 @@ import dirtytornadoes.controller.train.events.TrainEventListener;
 
 public class Controller extends Thread implements SerialDataEventListener
 {
-	public static final String PIPE = "|";
+	public static final char PIPE = 0x7c;
 	public static final boolean DEBUG = true;
 	
 	private SerialIO io;
@@ -30,9 +31,9 @@ public class Controller extends Thread implements SerialDataEventListener
 		running = false;
 		listeners = new ArrayList<TrainEventListener>();
 		
-		io = new SerialIO();
+		//io = new SerialIO();
 		//io.connect(SerialIO.JEFF_PORT);
-		io.addEventListener(this);
+		//io.addEventListener(this);
 	}
 	
 	public Train getTrain()
@@ -45,9 +46,26 @@ public class Controller extends Thread implements SerialDataEventListener
 		this.train = train;
 	}
 	
+	public void setIO( SerialIO io )
+	{
+		this.io = io;
+	}
+	
 	public SerialIO getIO()
 	{
 		return io;
+	}
+	
+	public void sendData( char port, char value )
+	{
+		try
+		{
+			io.sendData(port, value);
+		}
+		catch (SerialConnectionException e)
+		{
+			System.err.println(e);
+		}
 	}
 	
 	public void addTrainEventListener( TrainEventListener object )
@@ -59,13 +77,13 @@ public class Controller extends Thread implements SerialDataEventListener
 	@Override
 	public void handleSerialDataEvent( SerialDataEvent ev )
 	{
-		StringTokenizer st = new StringTokenizer(ev.getData(), PIPE);
+		char[] evData = ev.getData();
 		
-		int type = Integer.parseInt(st.nextToken());
+		char type = evData[0];
 		
-		String data = null;
-		if (st.hasMoreTokens())
-			data = st.nextToken();
+		char data = 0;
+		if (evData.length > 1)
+			data = evData[1];
 		
 		TrainEvent trainEv = new TrainEvent(this, type, data);
 		
@@ -93,19 +111,27 @@ public class Controller extends Thread implements SerialDataEventListener
 	{
 		running = true;
 		
+		long lastRun = System.currentTimeMillis();
+		
 		while(running)
 		{
 			train.checkConditions();
-			train.updateController();
 			
-			try
+			if ((lastRun + 250) <= System.currentTimeMillis())
 			{
-				Thread.sleep(250);
+				train.updateController();
+				lastRun = System.currentTimeMillis();
+			}
+				
+			
+			/*try
+			{
+				Thread.sleep(1);
 			}
 			catch (InterruptedException e)
 			{
 				e.printStackTrace();
-			}
+			}*/
 		}
 	}
 	
@@ -123,17 +149,29 @@ public class Controller extends Thread implements SerialDataEventListener
 	
 	// MAIN METHOD
 	
-	public static void main( String[] args ) throws IllegalTrainOperation
+	public static void main( String[] args ) throws IllegalTrainOperation, InterruptedException, SerialConnectionException
 	{
-		// setup
+		// serial IO setup
+		SerialIO s = new SerialIO();
+		s.connect(SerialIO.JEFF_PORT);
+		
+		// controller setup
 		Controller c = Controller.getInstance();
 		c.setTrain(new Train());
-		c.start();
+		s.addEventListener(c);
+		c.setIO(s);
 		
-		// get to work
-		c.handleSerialDataEvent(new SerialDataEvent(c, TrainEvent.ACTION_START_MOVING+""));
-		c.handleSerialDataEvent(new SerialDataEvent(c, TrainEvent.ACTION_EMERGENCY+""));
-		c.handleSerialDataEvent(new SerialDataEvent(c, TrainEvent.ACTION_OPEN_DOORS+""));
-		c.handleSerialDataEvent(new SerialDataEvent(c, TrainEvent.DOOR_OPEN+PIPE+Door.LEFT));
+		c.startController();
+		
+		/*c.handleSerialDataEvent(new SerialDataEvent(c, TrainEvent.ACTION_START_MOVING));
+		c.handleSerialDataEvent(new SerialDataEvent(c, TrainEvent.ACTION_EMERGENCY));
+		c.handleSerialDataEvent(new SerialDataEvent(c, TrainEvent.ACTION_OPEN_DOORS));
+		
+		char[] doorData = { TrainEvent.DOOR_OPEN, Door.LEFT };
+		c.handleSerialDataEvent(new SerialDataEvent(c, doorData));
+		
+		Thread.sleep(500);
+		
+		c.stopController();*/
 	}
 }
