@@ -36,7 +36,7 @@ public class SerialIO implements SerialPortEventListener, CommPortOwnershipListe
 	// listeners
 	private ArrayList<SerialDataEventListener> listeners;
 
-	protected SerialIO()
+	public SerialIO()
 	{
 		connected = false;
 		data = new LinkedList<String>();
@@ -173,10 +173,7 @@ public class SerialIO implements SerialPortEventListener, CommPortOwnershipListe
 	public void sendData( String data ) throws SerialConnectionException
 	{
 		if (!connected)
-		{
-			System.err.println("SerialIO :: Could not send data to an unopened port");
 			throw new SerialConnectionException("Can not send data to unopened port");
-		}
 
 		try
 		{
@@ -184,7 +181,6 @@ public class SerialIO implements SerialPortEventListener, CommPortOwnershipListe
 		}
 		catch (IOException e)
 		{
-			System.err.println("SerialIO :: Could not send data");
 			throw new SerialConnectionException(e.getMessage());
 		}
 	}
@@ -278,17 +274,5 @@ public class SerialIO implements SerialPortEventListener, CommPortOwnershipListe
 		{
 			System.out.println("SerialIO :: Someone is requesting port ownership...");
 		}
-	}
-
-	// SINGLETON CODE
-
-	private static class SingletonHolder
-	{
-		private final static SerialIO INSTANCE = new SerialIO();
-	}
-
-	public static SerialIO getInstance()
-	{
-		return SingletonHolder.INSTANCE;
 	}
 }

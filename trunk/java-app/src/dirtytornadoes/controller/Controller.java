@@ -5,6 +5,7 @@ import java.util.StringTokenizer;
 
 import dirtytornadoes.controller.io.SerialDataEvent;
 import dirtytornadoes.controller.io.SerialDataEventListener;
+import dirtytornadoes.controller.io.SerialIO;
 import dirtytornadoes.controller.train.Door;
 import dirtytornadoes.controller.train.IllegalTrainOperation;
 import dirtytornadoes.controller.train.Train;
@@ -16,6 +17,8 @@ public class Controller extends Thread implements SerialDataEventListener
 	public static final String PIPE = "|";
 	public static final boolean DEBUG = true;
 	
+	private SerialIO io;
+	
 	private Train train;
 	private volatile boolean running;
 	
@@ -26,6 +29,10 @@ public class Controller extends Thread implements SerialDataEventListener
 		super("Train Controller");
 		running = false;
 		listeners = new ArrayList<TrainEventListener>();
+		
+		io = new SerialIO();
+		//io.connect(SerialIO.JEFF_PORT);
+		io.addEventListener(this);
 	}
 	
 	public Train getTrain()
@@ -36,6 +43,11 @@ public class Controller extends Thread implements SerialDataEventListener
 	public void setTrain( Train train )
 	{
 		this.train = train;
+	}
+	
+	public SerialIO getIO()
+	{
+		return io;
 	}
 	
 	public void addTrainEventListener( TrainEventListener object )
