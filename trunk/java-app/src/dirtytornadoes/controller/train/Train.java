@@ -2,15 +2,12 @@ package dirtytornadoes.controller.train;
 
 import java.util.HashMap;
 
-import dirtytornadoes.controller.IllegalTrainOperation;
 import dirtytornadoes.controller.train.events.TrainEvent;
 
 public class Train extends TrainObject
 {
 	private Engine engine;
-	
 	private HashMap<String, Door> doors;
-	
 	private boolean emergency;
 	
 	public Train()
@@ -39,7 +36,7 @@ public class Train extends TrainObject
 			{
 				if (!d.isLocked())
 				{
-					engine.brakesOn();
+					engine.stop();
 				}
 			}
 		}
@@ -57,12 +54,41 @@ public class Train extends TrainObject
 			throw new IllegalTrainOperation("Cannot open doors while train in motion");
 		
 		for (Door d : doors.values())
+		{
+			if (d.isLocked())
+				d.unLock();
+			
 			d.open();
+		}
 	}
 	
-	public void closeDoors()
+	public void closeDoors() throws IllegalTrainOperation
 	{
+		for(Door d : doors.values())
+		{
+			if (d.isOpen())
+			{
+				if (d.isBlocked())
+					throw new IllegalTrainOperation("Cannot close doors, "+d.getName()+" is blocked");
+				else
+					d.close();
+			}
+		}
+	}
+	
+	public void lockDoors() throws IllegalTrainOperation
+	{
+		// make sure all doors are closed
+		closeDoors();
 		
+		for(Door d : doors.values())
+		{
+			if (!d.isLocked())
+				d.lock();
+			
+			if (!d.isLocked())
+				throw new IllegalTrainOperation("Could not lock door "+d.getName());
+		}
 	}
 	
 	public void startMoving() throws IllegalTrainOperation
@@ -70,21 +96,13 @@ public class Train extends TrainObject
 		if (engine.isInMotion())
 			return;
 		
-		for (Door d : doors.values())
+		try
 		{
-			if (!d.isLocked())
-			{
-				// try to lock doors
-				if (d.isOpen() && !d.isBlocked())
-				{
-					d.close();
-					d.lock();
-				}
-				else
-				{
-					throw new IllegalTrainOperation("Cannot move until all doors locked");
-				}
-			}
+			lockDoors();
+		}
+		catch (IllegalTrainOperation e)
+		{
+			throw new IllegalTrainOperation("Cannot move until all doors are closed and locked", e);
 		}
 		
 		engine.start();
@@ -107,6 +125,13 @@ public class Train extends TrainObject
 
 	@Override
 	public void handleTrainEvent( TrainEvent ev )
+	{
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void updateController()
 	{
 		// TODO Auto-generated method stub
 		

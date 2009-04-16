@@ -12,7 +12,6 @@ public class Door extends TrainObject
 	public Door( String name )
 	{
 		this.name = name;
-		
 		open = false;
 		locked = false;
 		blocked = false;
@@ -53,7 +52,8 @@ public class Door extends TrainObject
 
 	public void lock()
 	{
-		locked = true;
+		if (!open)
+			locked = true;
 	}
 	
 	public void unLock()
@@ -78,6 +78,13 @@ public class Door extends TrainObject
 
 	@Override
 	public void handleTrainEvent( TrainEvent ev )
+	{
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void updateController()
 	{
 		// TODO Auto-generated method stub
 		
