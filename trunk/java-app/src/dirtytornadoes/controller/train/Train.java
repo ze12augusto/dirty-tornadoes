@@ -8,6 +8,7 @@ public class Train extends TrainObject
 {
 	private Engine engine;
 	private HashMap<String, Door> doors;
+	
 	private boolean emergency;
 	
 	public Train()
@@ -29,15 +30,13 @@ public class Train extends TrainObject
 	
 	public void checkConditions()
 	{		
-		// check for open AND unlocked doors
+		// check for open OR unlocked doors
 		if (engine.isInMotion())
 		{
 			for(Door d : doors.values())
 			{
 				if (!d.isLocked())
-				{
-					engine.stop();
-				}
+					engine.brakesOn();
 			}
 		}
 		
@@ -69,9 +68,9 @@ public class Train extends TrainObject
 			if (d.isOpen())
 			{
 				if (d.isBlocked())
-					throw new IllegalTrainOperation("Cannot close doors, "+d.getName()+" is blocked");
-				else
-					d.close();
+					throw new IllegalTrainOperation("Could not close door "+d.getName()+", it is blocked");
+				else if (!d.close())
+					throw new IllegalTrainOperation("Could not close door "+d.getName());
 			}
 		}
 	}
@@ -83,11 +82,8 @@ public class Train extends TrainObject
 		
 		for(Door d : doors.values())
 		{
-			if (!d.isLocked())
-				d.lock();
-			
-			if (!d.isLocked())
-				throw new IllegalTrainOperation("Could not lock door "+d.getName());
+			if (!d.isLocked() || !d.lock())
+				throw new IllegalTrainOperation("Could not lock door "+d.getName());				
 		}
 	}
 	
@@ -95,6 +91,9 @@ public class Train extends TrainObject
 	{
 		if (engine.isInMotion())
 			return;
+		
+		if (isEmergency())
+			throw new IllegalTrainOperation("Cannot start moving until emergency has been reset");
 		
 		try
 		{
@@ -120,20 +119,33 @@ public class Train extends TrainObject
 	
 	public void resetEmergency()
 	{
-		emergency = false;
+		if (!engine.isInMotion())
+			emergency = false;
 	}
 
 	@Override
 	public void handleTrainEvent( TrainEvent ev )
 	{
-		// TODO Auto-generated method stub
-		
+		switch (ev.getType())
+		{
+			case TrainEvent.ACTION_EMERGENCY:
+				activateEmergency();
+			break;
+			
+			case TrainEvent.ACTION_EMERGENCY_RESET:
+				resetEmergency();
+			break;
+		}
 	}
 
 	@Override
 	public void updateController()
 	{
-		// TODO Auto-generated method stub
+		engine.updateController();
 		
+		for(Door d : doors.values())
+			d.updateController();
+		
+		// TODO: Send emergency info
 	}
 }

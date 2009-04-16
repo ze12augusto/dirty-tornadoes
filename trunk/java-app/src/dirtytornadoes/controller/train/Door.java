@@ -32,28 +32,33 @@ public class Door extends TrainObject
 		return open;
 	}
 
-	public void open()
+	public boolean open()
 	{
-		open = true;
+		if (!isLocked())
+			open = true;
+		
+		return open;
 	}
 	
-	public void close()
+	public boolean close()
 	{
-		open = false;
+		if (!isBlocked())
+			open = false;
+		
+		return !open;
 	}
 
 	public boolean isLocked()
 	{
-		if (isOpen())
-			return false;
-		else
-			return locked;
+		return locked;
 	}
 
-	public void lock()
+	public boolean lock()
 	{
-		if (!open)
+		if (!isOpen())
 			locked = true;
+		
+		return locked;
 	}
 	
 	public void unLock()
@@ -66,9 +71,12 @@ public class Door extends TrainObject
 		return blocked;
 	}
 
-	public void block()
+	public boolean block()
 	{
-		blocked = true;
+		if (isOpen())
+			blocked = true;
+		
+		return blocked;
 	}
 	
 	public void unBlock()
@@ -79,14 +87,32 @@ public class Door extends TrainObject
 	@Override
 	public void handleTrainEvent( TrainEvent ev )
 	{
-		// TODO Auto-generated method stub
+		if (!ev.getData().equals(name))
+			return;
 		
+		switch (ev.getType())
+		{
+			case TrainEvent.DOOR_BLOCK:
+				block();
+			break;
+			
+			case TrainEvent.DOOR_CLOSE:
+				close();
+			break;
+			
+			case TrainEvent.DOOR_OPEN:
+				open();
+			break;
+
+			default:
+			break;
+		}
 	}
 
 	@Override
 	public void updateController()
 	{
-		// TODO Auto-generated method stub
+		// TODO Send door information
 		
 	}
 }

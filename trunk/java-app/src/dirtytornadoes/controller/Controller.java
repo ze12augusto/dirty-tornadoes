@@ -41,7 +41,10 @@ public class Controller extends Thread implements SerialDataEventListener
 		StringTokenizer st = new StringTokenizer(ev.getData(), PIPE);
 		
 		int type = Integer.parseInt(st.nextToken());
-		String data = st.nextToken();
+		
+		String data = "";
+		if (st.hasMoreTokens())
+			data = st.nextToken();
 		
 		TrainEvent trainEv = new TrainEvent(this, type, data);
 		
@@ -61,7 +64,7 @@ public class Controller extends Thread implements SerialDataEventListener
 		
 		while(running)
 		{
-			
+			train.updateController();
 		}
 	}
 	
