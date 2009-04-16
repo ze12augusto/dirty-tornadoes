@@ -73,7 +73,7 @@ public class SerialIO implements SerialPortEventListener, CommPortOwnershipListe
 
 		try
 		{
-			// TODO: Confirm serial port params
+			// TODO Confirm serial port params
 			serialPort.setSerialPortParams(9600, SerialPort.DATABITS_8, SerialPort.STOPBITS_1, SerialPort.PARITY_NONE);
 		}
 		catch (UnsupportedCommOperationException e)

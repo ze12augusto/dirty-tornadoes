@@ -6,6 +6,7 @@ import java.util.StringTokenizer;
 import dirtytornadoes.controller.io.SerialDataEvent;
 import dirtytornadoes.controller.io.SerialDataEventListener;
 import dirtytornadoes.controller.io.SerialIO;
+import dirtytornadoes.controller.train.IllegalTrainOperation;
 import dirtytornadoes.controller.train.Train;
 import dirtytornadoes.controller.train.events.TrainEvent;
 import dirtytornadoes.controller.train.events.TrainEventListener;
@@ -13,6 +14,7 @@ import dirtytornadoes.controller.train.events.TrainEventListener;
 public class Controller extends Thread implements SerialDataEventListener
 {
 	public static final String PIPE = "|";
+	public static final boolean DEBUG = true;
 	
 	private Train train;
 	private volatile boolean running;
@@ -22,11 +24,18 @@ public class Controller extends Thread implements SerialDataEventListener
 	protected Controller()
 	{
 		super("Train Controller");
-		train = new Train();
 		running = false;
-		
-		SerialIO.getInstance().addEventListener(this);
 		listeners = new ArrayList<TrainEventListener>();
+	}
+	
+	public Train getTrain()
+	{
+		return train;
+	}
+	
+	public void setTrain( Train train )
+	{
+		this.train = train;
 	}
 	
 	public void addTrainEventListener( TrainEventListener object )
@@ -57,6 +66,16 @@ public class Controller extends Thread implements SerialDataEventListener
 		return running;
 	}
 	
+	public void startController()
+	{
+		start();
+	}
+	
+	public void stopController()
+	{
+		running = false;
+	}
+	
 	@Override
 	public void run()
 	{
@@ -64,7 +83,17 @@ public class Controller extends Thread implements SerialDataEventListener
 		
 		while(running)
 		{
+			train.checkConditions();
 			train.updateController();
+			
+			try
+			{
+				Thread.sleep(250);
+			}
+			catch (InterruptedException e)
+			{
+				e.printStackTrace();
+			}
 		}
 	}
 	
@@ -78,5 +107,21 @@ public class Controller extends Thread implements SerialDataEventListener
 	public static Controller getInstance()
 	{
 		return SingletonHolder.INSTANCE;
+	}
+	
+	// MAIN METHOD
+	
+	public static void main( String[] args ) throws IllegalTrainOperation
+	{
+		// setup
+		Controller c = Controller.getInstance();
+		c.setTrain(new Train());
+		Train t = c.getTrain();
+		
+		// get to work
+		t.startMoving();
+		t.activateEmergency();
+		t.stopMoving();
+		t.startMoving();
 	}
 }

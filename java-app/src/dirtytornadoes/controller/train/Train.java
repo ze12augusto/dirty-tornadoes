@@ -1,20 +1,21 @@
 package dirtytornadoes.controller.train;
 
-import java.util.HashMap;
+import java.util.ArrayList;
 
+import dirtytornadoes.controller.Controller;
 import dirtytornadoes.controller.train.events.TrainEvent;
 
 public class Train extends TrainObject
 {
 	private Engine engine;
-	private HashMap<String, Door> doors;
+	private ArrayList<Door> doors;
 	
 	private boolean emergency;
 	
 	public Train()
 	{
 		engine = new Engine();
-		doors = new HashMap<String, Door>();
+		doors = new ArrayList<Door>();
 		emergency = false;
 		
 		setupDoors();
@@ -22,28 +23,20 @@ public class Train extends TrainObject
 	
 	private void setupDoors()
 	{
-		String[] doorNames = { "left", "right" };
+		String[] doorNames = { Door.LEFT, Door.RIGHT };
 		
 		for (String name : doorNames)
-			doors.put(name, new Door(name));
+			doors.add(new Door(name));
 	}
 	
 	public void checkConditions()
 	{		
-		// check for open OR unlocked doors
+		// check for unlocked (OR open) doors
 		if (engine.isInMotion())
 		{
-			for(Door d : doors.values())
-			{
+			for(Door d : doors)
 				if (!d.isLocked())
-					engine.brakesOn();
-			}
-		}
-		
-		// check for emergency
-		if (isEmergency())
-		{
-			
+					engine.stop();
 		}
 	}
 	
@@ -52,7 +45,7 @@ public class Train extends TrainObject
 		if (engine.isInMotion())
 			throw new IllegalTrainOperation("Cannot open doors while train in motion");
 		
-		for (Door d : doors.values())
+		for (Door d : doors)
 		{
 			if (d.isLocked())
 				d.unLock();
@@ -63,15 +56,10 @@ public class Train extends TrainObject
 	
 	public void closeDoors() throws IllegalTrainOperation
 	{
-		for(Door d : doors.values())
+		for(Door d : doors)
 		{
 			if (d.isOpen())
-			{
-				if (d.isBlocked())
-					throw new IllegalTrainOperation("Could not close door "+d.getName()+", it is blocked");
-				else if (!d.close())
-					throw new IllegalTrainOperation("Could not close door "+d.getName());
-			}
+				d.close();
 		}
 	}
 	
@@ -80,10 +68,10 @@ public class Train extends TrainObject
 		// make sure all doors are closed
 		closeDoors();
 		
-		for(Door d : doors.values())
+		for(Door d : doors)
 		{
-			if (!d.isLocked() || !d.lock())
-				throw new IllegalTrainOperation("Could not lock door "+d.getName());				
+			if (!d.isLocked())
+				d.lock();			
 		}
 	}
 	
@@ -92,7 +80,7 @@ public class Train extends TrainObject
 		if (engine.isInMotion())
 			return;
 		
-		if (isEmergency())
+		if (hasEmergency())
 			throw new IllegalTrainOperation("Cannot start moving until emergency has been reset");
 		
 		try
@@ -104,10 +92,29 @@ public class Train extends TrainObject
 			throw new IllegalTrainOperation("Cannot move until all doors are closed and locked", e);
 		}
 		
+		brakesOff();
 		engine.start();
 	}
 	
-	public boolean isEmergency()
+	public void stopMoving()
+	{
+		engine.stop();
+	}
+	
+	public void brakesOn()
+	{
+		engine.brakesOn();
+	}
+	
+	public void brakesOff() throws IllegalTrainOperation
+	{
+		if (hasEmergency())
+			throw new IllegalTrainOperation("Cannot take brakes off when emergency presetn");
+		
+		engine.brakesOff();
+	}
+	
+	public boolean hasEmergency()
 	{
 		return emergency;
 	}
@@ -115,27 +122,64 @@ public class Train extends TrainObject
 	public void activateEmergency()
 	{
 		emergency = true;
+		if (Controller.DEBUG)
+			System.out.println("Emergency activated");
 	}
 	
-	public void resetEmergency()
+	public void resetEmergency() throws IllegalTrainOperation
 	{
-		if (!engine.isInMotion())
-			emergency = false;
+		if (engine.isInMotion())
+			throw new IllegalTrainOperation("Cannot reset emergency while train in motion");
+		
+		emergency = false;
+		if (Controller.DEBUG)
+			System.out.println("Emergency deactivated");
 	}
 
 	@Override
 	public void handleTrainEvent( TrainEvent ev )
 	{
-		switch (ev.getType())
+		try
 		{
-			case TrainEvent.ACTION_EMERGENCY:
-				activateEmergency();
-			break;
-			
-			case TrainEvent.ACTION_EMERGENCY_RESET:
-				resetEmergency();
-			break;
+			switch (ev.getType())
+			{
+				case TrainEvent.ACTION_CLOSE_DOORS:
+					closeDoors();
+				break;
+				
+				case TrainEvent.ACTION_LOCK_DOORS:
+					lockDoors();
+				break;
+				
+				case TrainEvent.ACTION_OPEN_DOORS:
+					openDoors();
+				break;
+				
+				case TrainEvent.ACTION_START_MOVING:
+					startMoving();
+				break;
+				
+				case TrainEvent.ACTION_STOP_MOVING:
+					stopMoving();
+				break;
+				
+				case TrainEvent.ACTION_EMERGENCY:
+					activateEmergency();
+				break;
+				
+				case TrainEvent.ACTION_EMERGENCY_RESET:
+					resetEmergency();
+				break;
+			}
 		}
+		catch (IllegalTrainOperation e)
+		{
+			System.err.println(e.getMessage());
+			
+			if (e.hasParent())
+				System.err.println("Parent Exception: "+e.getParent().getMessage());
+		}
+		
 	}
 
 	@Override
@@ -143,9 +187,9 @@ public class Train extends TrainObject
 	{
 		engine.updateController();
 		
-		for(Door d : doors.values())
+		for(Door d : doors)
 			d.updateController();
 		
-		// TODO: Send emergency info
+		// TODO Send emergency info
 	}
 }
