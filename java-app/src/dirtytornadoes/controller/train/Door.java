@@ -5,30 +5,34 @@ import dirtytornadoes.controller.train.events.TrainEvent;
 
 public class Door extends TrainObject
 {
-	public static final String LEFT = "Left";
-	public static final String RIGHT = "Right";
+	public static final char LEFT = 0x31;
+	public static final char RIGHT = 0x32;
 	
+	private char id;
 	private String name;
+	
 	private boolean open;
 	private boolean locked;
 	private boolean blocked;
 	
-	public Door( String name )
+	public Door( char id, String name )
 	{
+		this.id = id;
 		this.name = name;
+		
 		open = false;
 		locked = false;
 		blocked = false;
 	}
 	
+	public char getID()
+	{
+		return id;
+	}
+	
 	public String getName()
 	{
 		return name;
-	}
-	
-	public void setName( String name )
-	{
-		this.name = name;
 	}
 
 	public boolean isOpen()
@@ -132,7 +136,7 @@ public class Door extends TrainObject
 	@Override
 	public void handleTrainEvent( TrainEvent ev )
 	{
-		if (!ev.getData().equals(name))
+		if (ev.getData() != id)
 			return;
 		
 		switch (ev.getType())

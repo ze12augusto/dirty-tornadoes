@@ -7,6 +7,8 @@ import dirtytornadoes.controller.train.events.TrainEvent;
 
 public class Train extends TrainObject
 {
+	public static final char PORT_EMERGENCY = 0x42;
+	
 	private Engine engine;
 	private ArrayList<Door> doors;
 	
@@ -23,10 +25,8 @@ public class Train extends TrainObject
 	
 	private void setupDoors()
 	{
-		String[] doorNames = { Door.LEFT, Door.RIGHT };
-		
-		for (String name : doorNames)
-			doors.add(new Door(name));
+		doors.add(new Door(Door.LEFT, "Left"));
+		doors.add(new Door(Door.RIGHT, "Right"));
 	}
 	
 	public void checkConditions()
@@ -55,7 +55,8 @@ public class Train extends TrainObject
 			if (d.isLocked())
 				d.unLock();
 			
-			d.open();
+			if (!d.isOpen())
+				d.open();
 		}
 	}
 	
@@ -190,11 +191,16 @@ public class Train extends TrainObject
 	@Override
 	public void updateController()
 	{
+		System.out.println("Updating LED's");
+		
 		engine.updateController();
 		
 		for(Door d : doors)
 			d.updateController();
 		
-		// TODO Send emergency info
+		char value = 0;
+		
+		value = (emergency) ? '1' : '0';
+		getController().sendData(PORT_EMERGENCY, value);
 	}
 }

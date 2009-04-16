@@ -5,6 +5,9 @@ import dirtytornadoes.controller.train.events.TrainEvent;
 
 public class Engine extends TrainObject
 {
+	public static final char PORT_BRAKES = 0x40;
+	public static final char PORT_IN_MOTION = 0x41;
+	
 	private boolean inMotion;
 	private boolean brakesOn;
 	
@@ -120,11 +123,13 @@ public class Engine extends TrainObject
 	@Override
 	public void updateController()
 	{
-		// TODO Send engine information
+		char value = 0;
 		
-		// send motion
+		value = (inMotion) ? '1' : '0';
+		getController().sendData(PORT_IN_MOTION, value);
 		
 		// send brakes
-		
+		value = (brakesOn) ? '1' : '0';
+		getController().sendData(PORT_BRAKES, value);
 	}
 }

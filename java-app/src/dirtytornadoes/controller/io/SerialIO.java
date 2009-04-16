@@ -3,6 +3,7 @@ package dirtytornadoes.controller.io;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.nio.CharBuffer;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.TooManyListenersException;
@@ -19,7 +20,7 @@ import javax.comm.UnsupportedCommOperationException;
 public class SerialIO implements SerialPortEventListener, CommPortOwnershipListener
 {
 	// known ports
-	public static final String JEFF_PORT = "/dev/tts/0";
+	public static final String JEFF_PORT = "/dev/ttyS0";
 
 	public static final String BREAK = "@@BREAK@@";
 
@@ -40,6 +41,7 @@ public class SerialIO implements SerialPortEventListener, CommPortOwnershipListe
 	{
 		connected = false;
 		data = new LinkedList<String>();
+		listeners = new ArrayList<SerialDataEventListener>();
 	}
 
 	public void addEventListener( SerialDataEventListener object )
@@ -63,7 +65,7 @@ public class SerialIO implements SerialPortEventListener, CommPortOwnershipListe
 
 		try
 		{
-			serialPort = (SerialPort) portId.open("SimpleWrite", 2000);
+			serialPort = (SerialPort) portId.open("SerialIO", 2000);
 		}
 		catch (PortInUseException e)
 		{
@@ -121,6 +123,7 @@ public class SerialIO implements SerialPortEventListener, CommPortOwnershipListe
 		catch (Exception e)
 		{
 			System.err.println("SerialIO :: Error setting event notification");
+			serialPort.close();
 			throw new SerialConnectionException(e.getMessage());
 		}
 
@@ -172,12 +175,29 @@ public class SerialIO implements SerialPortEventListener, CommPortOwnershipListe
 
 	public void sendData( String data ) throws SerialConnectionException
 	{
+		sendData(data.getBytes());
+	}
+	
+	public void sendData( char port, char value ) throws SerialConnectionException
+	{
+		byte[] data = { (byte) port, (byte) value };
+		sendData(data);
+	}
+	
+	public void sendData( byte[] data ) throws SerialConnectionException
+	{
 		if (!connected)
 			throw new SerialConnectionException("Can not send data to unopened port");
 
 		try
 		{
-			output.write(data.getBytes());
+			output.write(data);
+			output.flush();
+			
+			for (byte b : data)
+				System.out.print(b + " ");
+			
+			System.out.println();
 		}
 		catch (IOException e)
 		{
@@ -212,15 +232,17 @@ public class SerialIO implements SerialPortEventListener, CommPortOwnershipListe
 					try
 					{
 						newData = input.read();
+						
+						//System.out.println("SerialIO :: Read in "+newData);
 
 						if (newData == -1)
 							break;
 
-						if ((char) newData == '\r')
+						if (newData == 10)
 						{
 							// at new line, add current buffer to data
 							data.add(inputBuffer.toString());
-							sendEvent(inputBuffer.toString());
+							sendEvent(inputBuffer.toString().toCharArray());
 
 							// start a new buffer
 							inputBuffer = new StringBuffer();
@@ -237,13 +259,11 @@ public class SerialIO implements SerialPortEventListener, CommPortOwnershipListe
 						return;
 					}
 				}
-
-				data.add(inputBuffer.toString());
 			break;
 
 			case SerialPortEvent.BI:
 				data.add(BREAK);
-				sendEvent(BREAK);
+				sendEvent(BREAK.toCharArray());
 			break;
 
 			case SerialPortEvent.OE:
@@ -259,7 +279,7 @@ public class SerialIO implements SerialPortEventListener, CommPortOwnershipListe
 		}
 	}
 
-	private void sendEvent( String input )
+	private void sendEvent( char[] input )
 	{
 		SerialDataEvent ev = new SerialDataEvent(this, input);
 
