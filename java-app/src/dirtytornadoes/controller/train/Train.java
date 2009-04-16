@@ -43,6 +43,11 @@ public class Train extends TrainObject
 					engine.stop();
 				}
 		}
+		else
+		{
+			if (!engine.brakesAreOn())
+				brakesOn();
+		}
 	}
 	
 	public void openDoors() throws IllegalTrainOperation
@@ -65,7 +70,18 @@ public class Train extends TrainObject
 		for(Door d : doors)
 		{
 			if (d.isOpen())
-				d.close();
+			{
+				try
+				{
+					d.close();
+				}
+				catch (IllegalTrainOperation e)
+				{
+					openDoors();
+					throw new IllegalTrainOperation("Could not close all doors, re-opening", e);
+				}
+			}
+				
 		}
 	}
 	
@@ -191,8 +207,6 @@ public class Train extends TrainObject
 	@Override
 	public void updateController()
 	{
-		System.out.println("Updating LED's");
-		
 		engine.updateController();
 		
 		for(Door d : doors)

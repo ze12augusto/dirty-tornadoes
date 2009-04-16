@@ -8,6 +8,11 @@ public class Door extends TrainObject
 	public static final char LEFT = 0x31;
 	public static final char RIGHT = 0x32;
 	
+	public static final char PORT_BASE = 0x43;
+	public static final char PORT_OPEN = 0x00;
+	public static final char PORT_LOCK = 0x01;
+	public static final char PORT_BLOCK = 0x02;
+	
 	private char id;
 	private String name;
 	
@@ -132,6 +137,26 @@ public class Door extends TrainObject
 		if (Controller.DEBUG)
 			System.out.println(name+" door FORCED unlocked");
 	}
+	
+	private char getStartPort()
+	{
+		return (char) (((id - 0x31) * 0x3) + PORT_BASE);
+	}
+	
+	private char getOpenPort()
+	{
+		return (char) (getStartPort() + PORT_OPEN);
+	}
+	
+	private char getLockPort()
+	{
+		return (char) (getStartPort() + PORT_LOCK);
+	}
+	
+	private char getBlockPort()
+	{
+		return (char) (getStartPort() + PORT_BLOCK);
+	}
 
 	@Override
 	public void handleTrainEvent( TrainEvent ev )
@@ -170,7 +195,18 @@ public class Door extends TrainObject
 	@Override
 	public void updateController()
 	{
-		// TODO Send door information
+		char value = 0;
 		
+		// open
+		value = (open) ? '1' : '0';
+		getController().sendData(getOpenPort(), value);
+		
+		// lock
+		value = (locked) ? '1' : '0';
+		getController().sendData(getLockPort(), value);
+		
+		// block
+		value = (blocked) ? '1' : '0';
+		getController().sendData(getBlockPort(), value);
 	}
 }

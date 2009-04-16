@@ -194,14 +194,15 @@ public class SerialIO implements SerialPortEventListener, CommPortOwnershipListe
 			output.write(data);
 			output.flush();
 			
-			for (byte b : data)
-				System.out.print(b + " ");
-			
-			System.out.println();
+			Thread.sleep(70);
 		}
 		catch (IOException e)
 		{
 			throw new SerialConnectionException(e.getMessage());
+		}
+		catch (InterruptedException e)
+		{
+			e.printStackTrace();
 		}
 	}
 
