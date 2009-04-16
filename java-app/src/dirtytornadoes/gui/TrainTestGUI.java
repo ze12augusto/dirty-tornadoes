@@ -18,28 +18,28 @@ package dirtytornadoes.gui;
  */
 public class TrainTestGUI extends javax.swing.JFrame {
 
-    final String LEFT_DOOR_BUTTON_OPEN = "Open Left Doors";
-    final String LEFT_DOOR_BUTTON_CLOSE = "Close Left Doors";
-    final String RIGHT_DOOR_BUTTON_OPEN = "Open Right Doors";
-    final String RIGHT_DOOR_BUTTON_CLOSE = "Close Right Doors";
-    final String DOOR_OPEN = "Open";
-    final String DOOR_CLOSED = "Closed";
-    final String BUTTON_BLOCK_DOORS = "Block Doors";
-    final String BUTTON_UNBLOCK_DOORS = "Unblock Doors";
-    final String DOOR_BLOCKED = "Blocked";
-    final String DOOR_LOCKED = "Locked";
-    final String BUTTON_UNLOCK_DOORS = "Unlock Doors";
-    final String BUTTON_LOCK_DOORS = "Lock Doors";
-    final String BRAKE_ON = "On";
-    final String BRAKE_OFF = "Off";
-    final String BUTTON_TURN_BREAKS_ON = "Apply Breaks";
-    final String BUTTON_TURN_BREAKS_OFF = "Turn Breaks Off";
-    final String TRAIN_STATIONARY = "Stationary";
-    final String TRAIN_IN_MOTION = "In Motion";
-    final String BUTTON_STOP_TRAIN = "Stop Train";
-    final String BUTTON_START_TRAIN = "Put Train In Motion";
-    final String EMERGENCY = "Emergency!!!";
-    final String NO_EMERGENCY = "No";
+    public static final String LEFT_DOOR_BUTTON_OPEN = "Open Left Doors";
+    public static final String LEFT_DOOR_BUTTON_CLOSE = "Close Left Doors";
+    public static final String RIGHT_DOOR_BUTTON_OPEN = "Open Right Doors";
+    public static final String RIGHT_DOOR_BUTTON_CLOSE = "Close Right Doors";
+    public static final String DOOR_OPEN = "Open";
+    public static final String DOOR_CLOSED = "Closed";
+    public static final String BUTTON_BLOCK_DOORS = "Block Doors";
+    public static final String BUTTON_UNBLOCK_DOORS = "Unblock Doors";
+    public static final String DOOR_BLOCKED = "Blocked";
+    public static final String DOOR_LOCKED = "Locked";
+    public static final String BUTTON_UNLOCK_DOORS = "Unlock Doors";
+    public static final String BUTTON_LOCK_DOORS = "Lock Doors";
+    public static final String BRAKE_ON = "On";
+    public static final String BRAKE_OFF = "Off";
+    public static final String BUTTON_TURN_BREAKS_ON = "Apply Breaks";
+    public static final String BUTTON_TURN_BREAKS_OFF = "Turn Breaks Off";
+    public static final String TRAIN_STATIONARY = "Stationary";
+    public static final String TRAIN_IN_MOTION = "In Motion";
+    public static final String BUTTON_STOP_TRAIN = "Stop Train";
+    public static final String BUTTON_START_TRAIN = "Put Train In Motion";
+    public static final String EMERGENCY = "Emergency!!!";
+    public static final String NO_EMERGENCY = "No";
     /** Creates new form TrainTestGUI */
     public TrainTestGUI() {
         initComponents();

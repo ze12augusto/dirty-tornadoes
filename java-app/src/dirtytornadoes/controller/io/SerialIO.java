@@ -16,9 +16,6 @@ import javax.comm.SerialPortEvent;
 import javax.comm.SerialPortEventListener;
 import javax.comm.UnsupportedCommOperationException;
 
-import dirtytornadoes.controller.train.events.TrainEventListener;
-
-
 public class SerialIO implements SerialPortEventListener, CommPortOwnershipListener
 {
 	// known ports
@@ -35,17 +32,17 @@ public class SerialIO implements SerialPortEventListener, CommPortOwnershipListe
 	private InputStream input;
 	private OutputStream output;
 	private LinkedList<String> data;
-	
+
 	// listeners
-	private ArrayList<TrainEventListener> listeners;
+	private ArrayList<SerialDataEventListener> listeners;
 
 	protected SerialIO()
 	{
 		connected = false;
 		data = new LinkedList<String>();
 	}
-	
-	public void addEventListener( TrainEventListener object )
+
+	public void addEventListener( SerialDataEventListener object )
 	{
 		if (!listeners.contains(object))
 			listeners.add(object);
@@ -191,12 +188,12 @@ public class SerialIO implements SerialPortEventListener, CommPortOwnershipListe
 			throw new SerialConnectionException(e.getMessage());
 		}
 	}
-	
+
 	public boolean hasMoreData()
 	{
 		return !data.isEmpty();
 	}
-	
+
 	public String readData()
 	{
 		if (hasMoreData())
@@ -225,10 +222,12 @@ public class SerialIO implements SerialPortEventListener, CommPortOwnershipListe
 
 						if ((char) newData == '\r')
 						{
-							// at new line, add current buffer to data and start a new one
+							// at new line, add current buffer to data
 							data.add(inputBuffer.toString());
+							sendEvent(inputBuffer.toString());
+
+							// start a new buffer
 							inputBuffer = new StringBuffer();
-							//inputBuffer.append('\n');
 						}
 						else
 						{
@@ -248,6 +247,7 @@ public class SerialIO implements SerialPortEventListener, CommPortOwnershipListe
 
 			case SerialPortEvent.BI:
 				data.add(BREAK);
+				sendEvent(BREAK);
 			break;
 
 			case SerialPortEvent.OE:
@@ -263,6 +263,14 @@ public class SerialIO implements SerialPortEventListener, CommPortOwnershipListe
 		}
 	}
 
+	private void sendEvent( String input )
+	{
+		SerialDataEvent ev = new SerialDataEvent(this, input);
+
+		for (SerialDataEventListener listener : listeners)
+			listener.handleSerialDataEvent(ev);
+	}
+
 	@Override
 	public void ownershipChange( int type )
 	{
@@ -271,14 +279,14 @@ public class SerialIO implements SerialPortEventListener, CommPortOwnershipListe
 			System.out.println("SerialIO :: Someone is requesting port ownership...");
 		}
 	}
-	
+
 	// SINGLETON CODE
-	
+
 	private static class SingletonHolder
 	{
 		private final static SerialIO INSTANCE = new SerialIO();
 	}
-	
+
 	public static SerialIO getInstance()
 	{
 		return SingletonHolder.INSTANCE;

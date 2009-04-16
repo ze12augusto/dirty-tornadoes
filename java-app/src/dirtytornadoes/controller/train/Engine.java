@@ -1,6 +1,5 @@
 package dirtytornadoes.controller.train;
 
-import dirtytornadoes.controller.IllegalTrainOperation;
 import dirtytornadoes.controller.train.events.TrainEvent;
 
 public class Engine extends TrainObject
@@ -33,13 +32,20 @@ public class Engine extends TrainObject
 		inMotion = false;
 	}
 
-	public boolean brakesOn()
+	public boolean isBrakesOn()
 	{
 		return brakesOn;
 	}
 
 	@Override
 	public void handleTrainEvent( TrainEvent ev )
+	{
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void updateController()
 	{
 		// TODO Auto-generated method stub
 		
