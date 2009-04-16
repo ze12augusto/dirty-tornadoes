@@ -6,6 +6,7 @@ import java.util.StringTokenizer;
 import dirtytornadoes.controller.io.SerialDataEvent;
 import dirtytornadoes.controller.io.SerialDataEventListener;
 import dirtytornadoes.controller.io.SerialIO;
+import dirtytornadoes.controller.train.Door;
 import dirtytornadoes.controller.train.IllegalTrainOperation;
 import dirtytornadoes.controller.train.Train;
 import dirtytornadoes.controller.train.events.TrainEvent;
@@ -116,12 +117,12 @@ public class Controller extends Thread implements SerialDataEventListener
 		// setup
 		Controller c = Controller.getInstance();
 		c.setTrain(new Train());
-		Train t = c.getTrain();
+		c.start();
 		
 		// get to work
-		t.startMoving();
-		t.activateEmergency();
-		t.stopMoving();
-		t.startMoving();
+		c.handleSerialDataEvent(new SerialDataEvent(c, TrainEvent.ACTION_START_MOVING+""));
+		c.handleSerialDataEvent(new SerialDataEvent(c, TrainEvent.ACTION_EMERGENCY+""));
+		c.handleSerialDataEvent(new SerialDataEvent(c, TrainEvent.ACTION_OPEN_DOORS+""));
+		c.handleSerialDataEvent(new SerialDataEvent(c, TrainEvent.DOOR_OPEN+PIPE+Door.LEFT));
 	}
 }

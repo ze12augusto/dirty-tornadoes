@@ -91,6 +91,13 @@ public class Door extends TrainObject
 			System.out.println(name+" door FORCED blocked");
 	}
 	
+	private void forceUnBlock()
+	{
+		blocked = false;
+		if (Controller.DEBUG)
+			System.out.println(name+" door FORCED unblocked");
+	}
+	
 	private void forceClose()
 	{
 		open = false;
@@ -114,6 +121,13 @@ public class Door extends TrainObject
 		if (Controller.DEBUG)
 			System.out.println(name+" door FORCED locked");
 	}
+	
+	private void forceUnLock()
+	{
+		locked = false;
+		if (Controller.DEBUG)
+			System.out.println(name+" door FORCED unlocked");
+	}
 
 	@Override
 	public void handleTrainEvent( TrainEvent ev )
@@ -127,6 +141,10 @@ public class Door extends TrainObject
 				forceBlock();
 			break;
 			
+			case TrainEvent.DOOR_UNBLOCK:
+				forceUnBlock();
+			break;
+			
 			case TrainEvent.DOOR_CLOSE:
 				forceClose();
 			break;
@@ -137,6 +155,10 @@ public class Door extends TrainObject
 			
 			case TrainEvent.DOOR_LOCK:
 				forceLock();
+			break;
+			
+			case TrainEvent.DOOR_UNLOCK:
+				forceUnLock();
 			break;
 		}
 	}
