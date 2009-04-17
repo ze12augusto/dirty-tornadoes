@@ -1,4 +1,8 @@
 package dirtytornadoes.gui;
+
+import dirtytornadoes.controller.train.IllegalTrainOperation;
+import dirtytornadoes.controller.train.Train;
+
 /*
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
@@ -20,8 +24,8 @@ public class TrainTestGUI extends javax.swing.JFrame {
 
     public static final String LEFT_DOOR_BUTTON_OPEN = "Open Left Doors";
     public static final String LEFT_DOOR_BUTTON_CLOSE = "Close Left Doors";
-    public static final String RIGHT_DOOR_BUTTON_OPEN = "Open Right Doors";
-    public static final String RIGHT_DOOR_BUTTON_CLOSE = "Close Right Doors";
+    public static final String RIGHT_DOOR_BUTTON_OPEN = "Open Doors";
+    public static final String RIGHT_DOOR_BUTTON_CLOSE = "Close Doors";
     public static final String DOOR_OPEN = "Open";
     public static final String DOOR_CLOSED = "Closed";
     public static final String BUTTON_BLOCK_DOORS = "Block Doors";
@@ -40,8 +44,12 @@ public class TrainTestGUI extends javax.swing.JFrame {
     public static final String BUTTON_START_TRAIN = "Put Train In Motion";
     public static final String EMERGENCY = "Emergency!!!";
     public static final String NO_EMERGENCY = "No";
+    private Train train;
+    private boolean running;
+    private CurrentTrainSettings currentSettings;
     /** Creates new form TrainTestGUI */
-    public TrainTestGUI() {
+    public TrainTestGUI(Train train) {
+    	this.train = train;
         initComponents();
     }
 
@@ -231,7 +239,7 @@ public class TrainTestGUI extends javax.swing.JFrame {
 
         lblStatusLeftDoor.setText("Left Door Status:");
 
-        lblStatusRightDoor.setText("Right Door Status:");
+        lblStatusRightDoor.setText("Door Status:");
 
         lblStatusBrakes.setText("Brake Status:");
 
@@ -336,7 +344,11 @@ public class TrainTestGUI extends javax.swing.JFrame {
                     .addComponent(panelInputs, javax.swing.GroupLayout.DEFAULT_SIZE, 240, Short.MAX_VALUE))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
-
+        
+      buttonOperatorInputLeftDoors.setVisible(false);
+      buttonTrainInputLeftDoors.setVisible(false);
+      lblStatusLeftDoor.setVisible(false);
+      lblStatusLeftDoorStatus.setVisible(false);
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
@@ -370,6 +382,12 @@ public class TrainTestGUI extends javax.swing.JFrame {
         // TODO add your handling code here:
         lblStatusLeftDoorStatus.setText(DOOR_LOCKED);
         lblStatusRightDoorStatus.setText(DOOR_LOCKED);
+        try {
+			train.lockDoors();
+		} catch (IllegalTrainOperation e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
     }//GEN-LAST:event_buttonTrainInputLockDoorsActionPerformed
 
     private void buttonTrainInputBrakesActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_buttonTrainInputBrakesActionPerformed
@@ -384,16 +402,12 @@ public class TrainTestGUI extends javax.swing.JFrame {
 
     private void buttonOperatorInputEmergencyActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_buttonOperatorInputEmergencyActionPerformed
         // TODO add your handling code here:
-        lblStatusEmergencyStatus.setText(EMERGENCY);
-        buttonOperatorInputEmergency.setEnabled(false);
-        buttonOperatorInputResetEmergency.setEnabled(true);
+        handleEmergency();
     }//GEN-LAST:event_buttonOperatorInputEmergencyActionPerformed
 
     private void buttonOperatorInputResetEmergencyActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_buttonOperatorInputResetEmergencyActionPerformed
         // TODO add your handling code here:
-        lblStatusEmergencyStatus.setText(NO_EMERGENCY);
-        buttonOperatorInputEmergency.setEnabled(true);
-        buttonOperatorInputResetEmergency.setEnabled(false);
+        resetEmergency();
     }//GEN-LAST:event_buttonOperatorInputResetEmergencyActionPerformed
 
     private void toggleLeftDoorInfo(){
@@ -414,46 +428,189 @@ public class TrainTestGUI extends javax.swing.JFrame {
             buttonTrainInputRightDoors.setText(RIGHT_DOOR_BUTTON_CLOSE);
             buttonOperatorInputRightDoors.setText(RIGHT_DOOR_BUTTON_CLOSE);
             lblStatusRightDoorStatus.setText(DOOR_OPEN);
+            try {
+				train.openDoors();
+			} catch (IllegalTrainOperation e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
         }
         else{
             buttonTrainInputRightDoors.setText(RIGHT_DOOR_BUTTON_OPEN);
             buttonOperatorInputRightDoors.setText(RIGHT_DOOR_BUTTON_OPEN);
             lblStatusRightDoorStatus.setText(DOOR_CLOSED);
+            try {
+				train.closeDoors();
+			} catch (IllegalTrainOperation e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
         }
     }
-
+    
+    private void toggleBlockedDoor(){
+    	if(buttonTrainInputBlockDoors.getText().equals(BUTTON_BLOCK_DOORS)){
+            buttonTrainInputRightDoors.setText(BUTTON_UNBLOCK_DOORS);
+            lblStatusRightDoorStatus.setText(DOOR_BLOCKED);
+        }
+        else{
+        	buttonTrainInputRightDoors.setText(BUTTON_BLOCK_DOORS);
+        	lblStatusRightDoorStatus.setText(DOOR_OPEN);
+        }
+    }
+    
+    private void toggleLockedDoor(){
+    	if(buttonTrainInputLockDoors.getText().equals(BUTTON_LOCK_DOORS)){
+            buttonTrainInputLockDoors.setText(BUTTON_UNLOCK_DOORS);
+            lblStatusRightDoorStatus.setText(DOOR_LOCKED);
+            try {
+				train.getDoors().get(0).lock();
+				train.getDoors().get(1).lock();
+			} catch (IllegalTrainOperation e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+        }
+        else{
+        	buttonTrainInputLockDoors.setText(BUTTON_LOCK_DOORS);
+        	lblStatusRightDoorStatus.setText(DOOR_CLOSED);
+        	train.getDoors().get(0).unLock();
+        	train.getDoors().get(1).unLock();
+        	
+        }
+    }
+    
     private void toggleBreaks(){
         if(lblStatusBrakeStatus.getText().equals(BRAKE_ON)){
             lblStatusBrakeStatus.setText(BRAKE_OFF);
             buttonTrainInputBrakes.setText(BUTTON_TURN_BREAKS_ON);
+            try {
+				train.brakesOff();
+			} catch (IllegalTrainOperation e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
         }
         else{
             lblStatusBrakeStatus.setText(BRAKE_ON);
             buttonTrainInputBrakes.setText(BUTTON_TURN_BREAKS_OFF);
+            train.brakesOn();
         }
     }
-
+    
     private void toggleTrainInMotion(){
         if(buttonTrainInputTrainInMotion.getText().equals(BUTTON_START_TRAIN)){
             lblStatusTrainStatus.setText(TRAIN_IN_MOTION);
             buttonTrainInputTrainInMotion.setText(BUTTON_STOP_TRAIN);
+            try {
+				train.startMoving();
+			} catch (IllegalTrainOperation e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
         }
         else{
             lblStatusTrainStatus.setText(TRAIN_STATIONARY);
             buttonTrainInputTrainInMotion.setText(BUTTON_START_TRAIN);
+            train.stopMoving();
         }
     }
+    
+    private void handleEmergency(){
+    	lblStatusEmergencyStatus.setText(EMERGENCY);
+        buttonOperatorInputEmergency.setEnabled(false);
+        buttonOperatorInputResetEmergency.setEnabled(true);
+        train.activateEmergency();
+    }
+    
+    private void resetEmergency(){
+    	lblStatusEmergencyStatus.setText(NO_EMERGENCY);
+        buttonOperatorInputEmergency.setEnabled(true);
+        buttonOperatorInputResetEmergency.setEnabled(false);
+        try {
+			train.resetEmergency();
+		} catch (IllegalTrainOperation e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+    }
+    
+    public void updateGUI(Train train){
+    	running = true;
+    	currentSettings = new CurrentTrainSettings(train);
+    	if(train.getDoors().get(0).isOpen() == (buttonOperatorInputRightDoors.getText() == RIGHT_DOOR_BUTTON_OPEN)){
+			toggleRightDoorInfo();
+		}
+    	if(train.getDoors().get(1).isLocked() == (buttonTrainInputLockDoors.getText() != BUTTON_UNLOCK_DOORS)){
+			toggleLockedDoor();
+		}
+    	if(train.getDoors().get(0).isBlocked() == (buttonTrainInputBlockDoors.getText() != BUTTON_UNBLOCK_DOORS)){
+    		toggleBlockedDoor();
+		}
+    	if(train.hasEmergency() == (buttonOperatorInputEmergency.isEnabled())){
+    		handleEmergency();
+    	}
+    	if(!train.hasEmergency() == (buttonOperatorInputResetEmergency.isEnabled())){
+    		resetEmergency();
+    	}
+    	if(train.getEngine().isInMotion() == (buttonTrainInputTrainInMotion.getText() == BUTTON_START_TRAIN)){
+    		toggleTrainInMotion();
+    	}
+    	if(train.getEngine().brakesAreOn() == (buttonTrainInputBrakes.getText() == BUTTON_TURN_BREAKS_ON)){
+    		toggleBreaks();
+    	}
+    	
+    	
+    	while(running){
+    		if(train.getDoors().get(0).isBlocked() != currentSettings.getDoorsBlocked()){
+    			toggleBlockedDoor();
+    			currentSettings.setDoorsBlocked(train.getDoors().get(0).isBlocked());
+    		}
+    		
+    		if(train.getDoors().get(0).isLocked() != currentSettings.getDoorsLocked()){
+    			toggleLockedDoor();
+    			currentSettings.setDoorsLocked(train.getDoors().get(0).isLocked());
+    		}
+    		
+    		if(train.getDoors().get(0).isOpen() != currentSettings.getDoorsOpen()){
+    			toggleRightDoorInfo();
+    			currentSettings.setDoorsOpen(train.getDoors().get(0).isOpen());
+    		}
+    		
+    		if(train.hasEmergency() != currentSettings.getEmergency()){
+    			if(train.hasEmergency()){
+    				handleEmergency();
+    				currentSettings.setEmergency(true);
+    			}
+    			else{
+    				resetEmergency();
+    				currentSettings.setEmergency(false);
+    			}
+    		}
+    		
+    		if(train.getEngine().brakesAreOn() != currentSettings.getBrakesOn()){
+    			toggleBreaks();
+    			currentSettings.setBrakesOn(train.getEngine().brakesAreOn());
+    		}
+    		
+    		if(train.getEngine().isInMotion() != currentSettings.getInMotion()){
+    			toggleTrainInMotion();
+    			currentSettings.setIsRunning(train.getEngine().isInMotion());
+    		}
+    	}
+    }
+    
     /**
     * @param args the command line arguments
-    */
+    *//*
     public static void main(String args[]) {
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {
-                new TrainTestGUI().setVisible(true);
+                new TrainTestGUI(null).setVisible(true);
             }
         });
     }
-
+*/
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton buttonOperatorInputEmergency;
     private javax.swing.JButton buttonOperatorInputLeftDoors;
