@@ -12,6 +12,7 @@ import dirtytornadoes.controller.train.IllegalTrainOperation;
 import dirtytornadoes.controller.train.Train;
 import dirtytornadoes.controller.train.events.TrainEvent;
 import dirtytornadoes.controller.train.events.TrainEventListener;
+import dirtytornadoes.gui.TrainTestGUI;
 
 public class Controller extends Thread implements SerialDataEventListener
 {
@@ -22,6 +23,7 @@ public class Controller extends Thread implements SerialDataEventListener
 	
 	private Train train;
 	private volatile boolean running;
+	private TrainTestGUI trainGUI;
 	
 	private ArrayList<TrainEventListener> listeners;
 	
@@ -44,6 +46,12 @@ public class Controller extends Thread implements SerialDataEventListener
 	public void setTrain( Train train )
 	{
 		this.train = train;
+	}
+	
+	public void createGUI(){
+		trainGUI = new TrainTestGUI(train);
+		 trainGUI.setVisible(true);
+		 trainGUI.updateGUI(train);
 	}
 	
 	public void setIO( SerialIO io )
@@ -119,7 +127,7 @@ public class Controller extends Thread implements SerialDataEventListener
 			
 			if ((lastRun + 250) <= System.currentTimeMillis())
 			{
-				train.updateController();
+	//			train.updateController();
 				lastRun = System.currentTimeMillis();
 			}
 				
@@ -152,14 +160,16 @@ public class Controller extends Thread implements SerialDataEventListener
 	public static void main( String[] args ) throws IllegalTrainOperation, InterruptedException, SerialConnectionException
 	{
 		// serial IO setup
-		SerialIO s = new SerialIO();
-		s.connect(SerialIO.JEFF_PORT);
+	//	SerialIO s = new SerialIO();
+	//	s.connect(SerialIO.JEFF_PORT);
 		
 		// controller setup
 		Controller c = Controller.getInstance();
 		c.setTrain(new Train());
-		s.addEventListener(c);
-		c.setIO(s);
+		c.createGUI();
+		
+	//	s.addEventListener(c);
+	//	c.setIO(s);
 		
 		c.startController();
 		

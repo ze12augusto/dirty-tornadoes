@@ -29,6 +29,14 @@ public class Train extends TrainObject
 		doors.add(new Door(Door.RIGHT, "Right"));
 	}
 	
+	public Engine getEngine(){
+		return engine;
+	}
+	
+	public ArrayList<Door> getDoors(){
+		return doors;
+	}
+	
 	public void checkConditions()
 	{		
 		// check for unlocked (OR open) doors
